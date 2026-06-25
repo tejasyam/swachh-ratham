@@ -1,0 +1,8 @@
+backend/__pycache__/
+backend/app/__pycache__/
+backend/app/routers/__pycache__/
+backend/swachh_ratham.db
+backend/.venv/
+mobile/node_modules/
+mobile/.expo/
+mobile/dist/

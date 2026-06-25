@@ -1,0 +1,37 @@
+{
+  "expo": {
+    "name": "Swachh Ratham",
+    "slug": "swachh-ratham",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#16a34a"
+      }
+    },
+    "plugins": [
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow Swachh Ratham to select object photos.",
+          "cameraPermission": "Allow Swachh Ratham to capture object photos."
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow Swachh Ratham to use your location for accurate pickup pins.",
+          "locationWhenInUsePermission": "Allow Swachh Ratham to use your location for accurate pickup pins."
+        }
+      ],
+      "expo-asset"
+    ]
+  }
+}
