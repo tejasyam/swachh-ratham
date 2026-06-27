@@ -1,5 +1,6 @@
 import { StyleSheet } from "react-native";
 
+// Central palette keeps the green circular-economy theme consistent.
 export const colors = {
   green: "#2f7d57",
   greenDark: "#174936",
@@ -23,6 +24,7 @@ export const colors = {
 };
 
 export const styles = StyleSheet.create({
+  // Shared primitives used by most screens for consistent spacing and shapes.
   screen: {
     flex: 1,
     backgroundColor: colors.background,

@@ -7,6 +7,7 @@ import { colors, styles } from "../theme";
 import { AdminStats } from "../types";
 
 export default function AdminDashboardScreen({ navigation }: any) {
+  // Admin landing page with live operational counters and shortcuts.
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -35,6 +36,7 @@ export default function AdminDashboardScreen({ navigation }: any) {
         <StatCard label="Completed" value={stats?.completed_pickups || 0} />
       </View>
       <PrimaryButton title="Manage pickups" onPress={() => navigation.navigate("PickupManagement")} icon="briefcase" />
+      <PrimaryButton title="Map view" onPress={() => navigation.navigate("AdminPickupMap")} icon="map" />
       <PrimaryButton title="Analytics" onPress={() => navigation.navigate("Analytics")} icon="bar-chart" />
       <PrimaryButton title="Profile" onPress={() => navigation.navigate("Profile")} icon="person" />
     </ScrollView>

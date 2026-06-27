@@ -4,6 +4,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { colors, styles } from "./theme";
 import { ObjectItem, Pickup } from "./types";
 
+// Small reusable UI primitives keep screens focused on behavior instead of
+// repeating card/button/badge markup.
 export function PrimaryButton({
   title,
   onPress,
@@ -41,6 +43,8 @@ export function PrimaryButton({
 }
 
 export function StatusBadge({ value }: { value: string }) {
+  // Status and classification values share the same badge component with
+  // different color tones.
   const badgeColors: Record<string, { bg: string; text: string }> = {
     Reusable: { bg: colors.greenSoft, text: colors.greenDark },
     Repairable: { bg: colors.amberSoft, text: colors.clay },
@@ -64,6 +68,7 @@ export function StatCard({ label, value, tone = colors.green }: { label: string;
 }
 
 export function ObjectCard({ item, onPress }: { item: ObjectItem; onPress?: () => void }) {
+  // Citizen object summary used in lists and tracking views.
   const quantityLabel = `Qty ${item.quantity || 1}`;
   return (
     <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.82}>
@@ -83,6 +88,7 @@ export function ObjectCard({ item, onPress }: { item: ObjectItem; onPress?: () =
 }
 
 export function PickupCard({ pickup, onPress }: { pickup: Pickup; onPress?: () => void }) {
+  // Pickup summary used by admin map, admin management, and driver dashboard.
   return (
     <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.82}>
       <View style={styles.row}>

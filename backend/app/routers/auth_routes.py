@@ -19,6 +19,7 @@ router = APIRouter(prefix="/auth", tags=["Authentication"])
 
 
 def otp_response(identifier: str, otp: str):
+    # Keep OTP response formatting in one place for both email and phone users.
     channel = otp_channel(identifier)
     target = "email" if channel == "email" else "SMS"
     return {
@@ -31,6 +32,7 @@ def otp_response(identifier: str, otp: str):
 
 @router.post("/register", response_model=schemas.OtpChallenge)
 def register(payload: schemas.UserCreate, db: Session = Depends(get_db)):
+    # Registration creates the user first, then asks them to verify via OTP.
     email = payload.email.lower() if payload.email else None
     phone = normalize_identifier(payload.phone or "") if payload.phone else None
     if not email and not phone:
@@ -58,6 +60,7 @@ def register(payload: schemas.UserCreate, db: Session = Depends(get_db)):
 
 @router.post("/login", response_model=schemas.Token)
 def login(payload: schemas.LoginRequest, db: Session = Depends(get_db)):
+    # Password login accepts either email or phone through the identifier field.
     user = authenticate_user_by_identifier(db, payload.identifier, payload.password)
     if not user:
         raise HTTPException(status_code=401, detail="Invalid email/phone or password")
@@ -67,6 +70,7 @@ def login(payload: schemas.LoginRequest, db: Session = Depends(get_db)):
 
 @router.post("/verify-otp", response_model=schemas.Token)
 def verify_otp(payload: schemas.OtpVerifyRequest, db: Session = Depends(get_db)):
+    # Successful OTP verification clears the OTP and immediately returns a JWT.
     user = get_user_by_identifier(db, payload.identifier)
     if not user or not verify_user_otp(user, payload.otp):
         raise HTTPException(status_code=401, detail="Invalid or expired OTP")

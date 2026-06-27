@@ -4,6 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { colors, styles } from "../theme";
 
 export default function SplashScreen({ navigation }: any) {
+  // Splash auto-forwards to login when it is used in the logged-out stack.
   useEffect(() => {
     const timer = setTimeout(() => navigation?.replace?.("Login"), 900);
     return () => clearTimeout(timer);

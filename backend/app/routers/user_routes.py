@@ -14,6 +14,7 @@ def get_user_objects(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user),
 ):
+    # Admins can inspect any citizen's objects; citizens can only inspect self.
     if current_user.role != "admin" and current_user.id != user_id:
         raise HTTPException(status_code=403, detail="Insufficient permissions")
     user = db.query(models.User).filter(models.User.id == user_id).first()

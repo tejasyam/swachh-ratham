@@ -6,10 +6,12 @@ import { colors, styles } from "../theme";
 import { ObjectItem } from "../types";
 
 export default function ObjectDetailsScreen({ route, navigation }: any) {
+  // Accept either a full object from navigation params or an id to fetch fresh.
   const [item, setItem] = useState<ObjectItem | null>(route.params?.object || null);
   const objectId = route.params?.objectId || item?.id;
 
   useEffect(() => {
+    // Fetching on mount keeps details current after admin/driver status changes.
     if (objectId) {
       apiFetch<ObjectItem>(`/objects/${objectId}`).then(setItem).catch((error) => Alert.alert("Could not load object", error.message));
     }

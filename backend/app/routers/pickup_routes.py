@@ -11,6 +11,8 @@ router = APIRouter(prefix="/pickups", tags=["Pickups"])
 
 
 def pickup_query(db: Session):
+    # Eager-load related records so pickup responses include object, citizen,
+    # and driver details without N+1 query behavior.
     return db.query(models.PickupRequest).options(
         joinedload(models.PickupRequest.object_item),
         joinedload(models.PickupRequest.citizen),
@@ -19,6 +21,8 @@ def pickup_query(db: Session):
 
 
 def serialize_pickup(pickup: models.PickupRequest):
+    # Convert relationship names into the nested response fields expected by
+    # PickupOut and the React Native UI.
     return {
         "id": pickup.id,
         "object_id": pickup.object_id,
@@ -40,6 +44,7 @@ def request_pickup(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(require_role("citizen")),
 ):
+    # Single-object pickup request. Duplicate requests are blocked per object.
     item = db.query(models.ObjectItem).filter(models.ObjectItem.id == payload.object_id).first()
     if not item or item.user_id != current_user.id:
         raise HTTPException(status_code=404, detail="Object not found")
@@ -69,6 +74,8 @@ def request_bulk_pickup(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(require_role("citizen")),
 ):
+    # Bulk pickup groups multiple objects under one address and group id so the
+    # admin/driver can treat them as a single operational batch.
     object_ids = list(dict.fromkeys(payload.object_ids))
     if not object_ids:
         raise HTTPException(status_code=400, detail="Add at least one object to the cart")
@@ -123,6 +130,8 @@ def request_bulk_pickup(
 def get_pickups(
     db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)
 ):
+    # The same endpoint powers three role views: admin sees all, driver sees
+    # assigned work, and citizen sees their own requests.
     query = pickup_query(db).order_by(models.PickupRequest.id.desc())
     if current_user.role == "admin":
         pickups = query.all()
@@ -140,6 +149,7 @@ def assign_driver(
     db: Session = Depends(get_db),
     _: models.User = Depends(require_role("admin")),
 ):
+    # Admin assignment moves the pickup from pending into the driver's queue.
     pickup = db.query(models.PickupRequest).filter(models.PickupRequest.id == pickup_id).first()
     if not pickup:
         raise HTTPException(status_code=404, detail="Pickup not found")
@@ -167,6 +177,8 @@ def assign_bulk_driver(
     db: Session = Depends(get_db),
     _: models.User = Depends(require_role("admin")),
 ):
+    # Bulk assignment applies the same driver/status change to every request in
+    # the group.
     driver = (
         db.query(models.User)
         .filter(models.User.id == payload.driver_id, models.User.role == "driver")
@@ -206,6 +218,8 @@ def update_pickup_status(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user),
 ):
+    # Drivers and admins can advance status. Citizens track status but cannot
+    # mutate the pickup workflow.
     allowed = {"Accepted", "On the way", "Collected", "Delivered", "Completed", "Cancelled"}
     if payload.status not in allowed:
         raise HTTPException(status_code=400, detail="Invalid status")
@@ -219,6 +233,8 @@ def update_pickup_status(
         raise HTTPException(status_code=403, detail="Citizens cannot update pickup status")
 
     already_rewarded = (
+        # Check tracking history, not just current status, so EcoPoints are not
+        # awarded twice if a pickup is toggled after collection.
         db.query(models.ItemTracking)
         .filter(
             models.ItemTracking.object_id == pickup.object_id,

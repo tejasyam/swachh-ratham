@@ -15,6 +15,7 @@ def get_driver_pickups(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user),
 ):
+    # Drivers are forced to their own id even if they try another driver_id.
     if current_user.role == "driver":
         driver_id = current_user.id
     pickups = (

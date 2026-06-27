@@ -18,6 +18,8 @@ const DEFAULT_REGION: Region = {
 };
 
 function formatAddress(place: Location.LocationGeocodedAddress, coordinate: Coordinate) {
+  // Convert reverse-geocoding pieces into a readable address while preserving
+  // exact coordinates for pickup precision.
   const parts = [
     place.name,
     place.street,
@@ -37,6 +39,7 @@ export default function LocationPicker({
   address: string;
   onAddressChange: (address: string) => void;
 }) {
+  // Local map state tracks both the visible region and the draggable pickup pin.
   const [region, setRegion] = useState<Region>(DEFAULT_REGION);
   const [pin, setPin] = useState<Coordinate>({
     latitude: DEFAULT_REGION.latitude,
@@ -45,6 +48,8 @@ export default function LocationPicker({
   const [loading, setLoading] = useState(false);
 
   async function updatePin(coordinate: Coordinate) {
+    // Updating the pin also attempts reverse geocoding so the text address stays
+    // in sync with the selected map location.
     setPin(coordinate);
     setRegion((current) => ({
       ...current,
@@ -64,6 +69,8 @@ export default function LocationPicker({
   }
 
   async function useCurrentLocation() {
+    // Optional shortcut for citizens who want the pickup point near their
+    // current device location.
     try {
       setLoading(true);
       const permission = await Location.requestForegroundPermissionsAsync();

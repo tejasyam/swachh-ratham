@@ -9,10 +9,12 @@ import { colors, styles } from "../theme";
 import { Pickup } from "../types";
 
 export default function DriverDashboardScreen({ navigation }: any) {
+  // Driver dashboard only shows pickups assigned to the logged-in driver.
   const { user } = useAuth();
   const [pickups, setPickups] = useState<Pickup[]>([]);
 
   async function load() {
+    // Backend ignores the path id for drivers and returns only their own work.
     if (user) {
       setPickups(await apiFetch<Pickup[]>(`/drivers/${user.id}/pickups`));
     }

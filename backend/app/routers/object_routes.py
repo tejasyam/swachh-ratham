@@ -15,6 +15,8 @@ def create_object(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(require_role("citizen")),
 ):
+    # Citizens upload object details; the backend classifies before saving so
+    # every client sees the same result.
     classification, preferred_action, reason, confidence = classify_object(
         payload.category,
         payload.condition,
@@ -56,6 +58,7 @@ def create_object(
 def get_objects(
     db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)
 ):
+    # Admins can review all objects, while citizens only see their own uploads.
     if current_user.role == "admin":
         return db.query(models.ObjectItem).order_by(models.ObjectItem.id.desc()).all()
     return (
@@ -72,6 +75,7 @@ def get_object(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user),
 ):
+    # Object details are private to the owner unless the viewer is an admin.
     item = db.query(models.ObjectItem).filter(models.ObjectItem.id == object_id).first()
     if not item:
         raise HTTPException(status_code=404, detail="Object not found")
@@ -87,6 +91,8 @@ def update_object(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(require_role("citizen")),
 ):
+    # Objects remain editable only until a pickup is requested; after that the
+    # pickup workflow owns the status history.
     item = db.query(models.ObjectItem).filter(models.ObjectItem.id == object_id).first()
     if not item or item.user_id != current_user.id:
         raise HTTPException(status_code=404, detail="Object not found")

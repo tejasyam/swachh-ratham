@@ -9,6 +9,8 @@ import { Pickup } from "../types";
 const statuses = ["Accepted", "On the way", "Collected", "Delivered"];
 
 function getPickupDestination(address: string) {
+  // If the stored address includes a map pin, Google Maps can route directly to
+  // coordinates; otherwise it falls back to searching the address text.
   const match = address.match(/Pin:\s*(-?\d+(?:\.\d+)?),\s*(-?\d+(?:\.\d+)?)/i);
   if (match) {
     return `${match[1]},${match[2]}`;
@@ -17,9 +19,11 @@ function getPickupDestination(address: string) {
 }
 
 export default function AssignedPickupDetailsScreen({ route, navigation }: any) {
+  // Driver detail screen owns route navigation and pickup status progression.
   const [pickup, setPickup] = useState<Pickup>(route.params.pickup);
 
   async function openDirections(address: string) {
+    // Ask for current location only when directions are actually needed.
     const permission = await Location.requestForegroundPermissionsAsync();
     if (!permission.granted) {
       Alert.alert("Location permission needed", "Allow location access so directions can start from your current location.");
@@ -33,6 +37,7 @@ export default function AssignedPickupDetailsScreen({ route, navigation }: any) 
   }
 
   async function update(status: string) {
+    // Marking Collected triggers backend EcoPoints reward logic.
     try {
       const updated = await apiFetch<Pickup>(`/pickups/${pickup.id}/status`, {
         method: "PUT",

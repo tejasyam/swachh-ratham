@@ -6,12 +6,14 @@ import { useAuth } from "../context/AuthContext";
 import { colors, styles } from "../theme";
 
 export default function LoginScreen({ navigation }: any) {
+  // Login defaults to the seeded citizen account so demo testing is fast.
   const { login } = useAuth();
   const [identifier, setIdentifier] = useState("citizen@swachhratham.com");
   const [password, setPassword] = useState("citizen123");
   const [loading, setLoading] = useState(false);
 
   async function submit() {
+    // AuthContext stores the returned JWT and switches navigation by role.
     try {
       setLoading(true);
       await login(identifier, password);

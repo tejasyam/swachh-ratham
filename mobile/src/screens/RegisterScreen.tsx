@@ -7,6 +7,7 @@ import { colors, styles } from "../theme";
 const roles = ["citizen", "admin", "driver"];
 
 export default function RegisterScreen() {
+  // Registration is a two-step flow: create account, then verify the demo OTP.
   const { register, verifyOtp } = useAuth();
   const [name, setName] = useState("");
   const [identifier, setIdentifier] = useState("");
@@ -17,6 +18,7 @@ export default function RegisterScreen() {
   const [loading, setLoading] = useState(false);
 
   async function submit() {
+    // The same button either requests an OTP or verifies it depending on state.
     try {
       setLoading(true);
       if (otpSent) {

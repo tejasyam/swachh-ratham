@@ -1,3 +1,4 @@
+// Shared TypeScript models mirror the backend response schemas.
 export type Role = "citizen" | "admin" | "driver";
 
 export type User = {
@@ -10,6 +11,7 @@ export type User = {
 };
 
 export type ObjectItem = {
+  // Object fields include both citizen-entered data and backend classification.
   id: number;
   user_id: number;
   name: string;
@@ -31,6 +33,7 @@ export type ObjectItem = {
 };
 
 export type Pickup = {
+  // Pickup responses may include nested related records for richer cards.
   id: number;
   object_id: number;
   user_id: number;

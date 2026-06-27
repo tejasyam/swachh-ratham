@@ -9,6 +9,7 @@ import { Pickup } from "../types";
 const deliveredStatuses = new Set(["Collected", "Delivered", "Completed"]);
 
 export default function DeliveredOrdersScreen() {
+  // Admin history view filters all pickups down to completed/collected orders.
   const [orders, setOrders] = useState<Pickup[]>([]);
 
   async function load() {

@@ -24,10 +24,13 @@ import AssignedPickupDetailsScreen from "./src/screens/AssignedPickupDetailsScre
 import AnalyticsScreen from "./src/screens/AnalyticsScreen";
 import ProfileScreen from "./src/screens/ProfileScreen";
 import DeliveredOrdersScreen from "./src/screens/DeliveredOrdersScreen";
+import AdminPickupMapScreen from "./src/screens/AdminPickupMapScreen";
 
 const Stack = createNativeStackNavigator();
 const Tabs = createBottomTabNavigator();
 
+// Citizen gets bottom tabs because their workflow is repeated: home, add item,
+// review objects, and profile.
 function CitizenTabs() {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }} edges={["top"]}>
@@ -84,6 +87,7 @@ function CitizenTabs() {
 }
 
 function floatingTabOptions(routeName: string) {
+  // Driver tabs reuse the same floating visual style as citizen tabs.
   return {
     headerShown: false,
     tabBarActiveTintColor: colors.green,
@@ -126,6 +130,7 @@ function floatingTabOptions(routeName: string) {
 }
 
 function DriverTabs() {
+  // Drivers mainly switch between assigned pickups and profile/logout.
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }} edges={["top"]}>
       <Tabs.Navigator screenOptions={({ route }) => floatingTabOptions(route.name)}>
@@ -140,6 +145,7 @@ function AppNavigator() {
   const { user, loading } = useAuth();
 
   if (loading) {
+    // While token restore is in progress, keep the app on a neutral splash view.
     return <SplashScreen />;
   }
 
@@ -155,26 +161,31 @@ function AppNavigator() {
         }}
       >
         {!user ? (
+          // Logged-out users only see authentication screens.
           <>
             <Stack.Screen name="Splash" component={SplashScreen} options={{ headerShown: false }} />
             <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
             <Stack.Screen name="Register" component={RegisterScreen} options={{ title: "Create account" }} />
           </>
         ) : user.role === "citizen" ? (
+          // Citizen stack contains the tab shell plus object/pickup detail flows.
           <>
             <Stack.Screen name="CitizenTabs" component={CitizenTabs} options={{ headerShown: false }} />
             <Stack.Screen name="ObjectDetails" component={ObjectDetailsScreen} options={{ title: "Object details" }} />
             <Stack.Screen name="PickupRequest" component={PickupRequestScreen} options={{ title: "Request pickup" }} />
           </>
         ) : user.role === "admin" ? (
+          // Admin screens are stack-based because they are operational tools.
           <>
             <Stack.Screen name="AdminDashboard" component={AdminDashboardScreen} options={{ title: "Admin dashboard" }} />
             <Stack.Screen name="PickupManagement" component={PickupManagementScreen} options={{ title: "Pickup management" }} />
+            <Stack.Screen name="AdminPickupMap" component={AdminPickupMapScreen} options={{ title: "Pickup map" }} />
             <Stack.Screen name="Analytics" component={AnalyticsScreen} options={{ title: "Analytics" }} />
             <Stack.Screen name="Profile" component={ProfileScreen} options={{ title: "Profile" }} />
             <Stack.Screen name="DeliveredOrders" component={DeliveredOrdersScreen} options={{ title: "Delivered orders" }} />
           </>
         ) : (
+          // Any remaining authenticated role is treated as a driver.
           <>
             <Stack.Screen name="DriverTabs" component={DriverTabs} options={{ headerShown: false }} />
             <Stack.Screen name="AssignedPickupDetails" component={AssignedPickupDetailsScreen} options={{ title: "Assigned pickup" }} />
@@ -186,6 +197,7 @@ function AppNavigator() {
 }
 
 export default function App() {
+  // Providers are kept at the root so auth and safe-area state work everywhere.
   return (
     <SafeAreaProvider>
       <AuthProvider>

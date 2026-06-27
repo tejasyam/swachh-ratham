@@ -12,6 +12,8 @@ import { colors, styles } from "../theme";
 import { ObjectItem, Pickup } from "../types";
 
 export default function CitizenHomeScreen({ navigation }: any) {
+  // Citizen dashboard combines account impact, current pickup state, and saved
+  // pickup address management.
   const { user, refreshMe } = useAuth();
   const [objects, setObjects] = useState<ObjectItem[]>([]);
   const [pickups, setPickups] = useState<Pickup[]>([]);
@@ -26,6 +28,7 @@ export default function CitizenHomeScreen({ navigation }: any) {
   const addressPreview = pickupAddress.split("\n")[0] || "Select pickup location";
 
   async function load() {
+    // Refresh objects, pickups, saved address, and EcoPoints in one pass.
     const [objectData, pickupData] = await Promise.all([
       apiFetch<ObjectItem[]>("/objects"),
       apiFetch<Pickup[]>("/pickups")
@@ -58,6 +61,7 @@ export default function CitizenHomeScreen({ navigation }: any) {
   }
 
   async function saveAddress() {
+    // Persist the latest address plus a short history for quick reuse.
     const value = draftAddress.trim();
     setPickupAddress(value);
     if (value) {

@@ -7,6 +7,7 @@ import { colors, styles } from "../theme";
 import { AdminStats } from "../types";
 
 export default function AnalyticsScreen() {
+  // Admin analytics are simple live cards backed by /admin/stats.
   const [stats, setStats] = useState<AdminStats | null>(null);
 
   useFocusEffect(useCallback(() => { apiFetch<AdminStats>("/admin/stats").then(setStats).catch(() => undefined); }, []));

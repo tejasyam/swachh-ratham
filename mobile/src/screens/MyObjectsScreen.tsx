@@ -7,6 +7,7 @@ import { styles } from "../theme";
 import { ObjectItem } from "../types";
 
 export default function MyObjectsScreen({ navigation }: any) {
+  // Citizen tracking list. Data reloads whenever the tab/screen regains focus.
   const [objects, setObjects] = useState<ObjectItem[]>([]);
   const [refreshing, setRefreshing] = useState(false);
 

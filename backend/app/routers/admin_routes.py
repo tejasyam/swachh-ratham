@@ -14,6 +14,7 @@ def stats(
     db: Session = Depends(get_db),
     _: models.User = Depends(require_role("admin")),
 ):
+    # Dashboard counters are calculated live from the database for the prototype.
     total_users = db.query(models.User).count()
     total_objects = db.query(models.ObjectItem).count()
     pending_pickups = (

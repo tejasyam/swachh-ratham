@@ -6,6 +6,8 @@ from .auth import hash_password
 from .database import engine
 
 
+# Shared backend business logic lives here so routes stay mostly focused on
+# permissions, request validation, and database persistence.
 def _clean(value: str | None) -> str:
     return (value or "").strip().lower()
 
@@ -20,6 +22,8 @@ def classify_object(
     hazardous: bool = False,
     description: str | None = None,
 ) -> tuple[str, str, str, int]:
+    # Rule-based classifier: each signal adds points to one of the circular
+    # economy outcomes, then the highest score becomes the final classification.
     category_value = _clean(category)
     condition_value = _clean(condition)
     material_value = _clean(material)
@@ -42,6 +46,7 @@ def classify_object(
     reasons: dict[str, list[str]] = {key: [] for key in scores}
 
     def add(label: str, points: int, reason: str):
+        # Store both score and human-readable explanation for the chosen result.
         scores[label] += points
         reasons[label].append(reason)
 
@@ -88,6 +93,8 @@ def classify_object(
 
 
 def calculate_ecopoints(item: models.ObjectItem) -> tuple[int, str]:
+    # EcoPoints are based on item type, quantity, condition, and final action.
+    # The min/max clamp keeps prototype rewards predictable.
     category_value = _clean(item.category)
     material_value = _clean(item.material)
     condition_value = _clean(item.condition)
@@ -139,6 +146,8 @@ def calculate_ecopoints(item: models.ObjectItem) -> tuple[int, str]:
 
 
 def migrate_object_columns():
+    # Lightweight migrations keep older local/Supabase tables compatible as the
+    # prototype schema evolves without requiring Alembic.
     inspector = inspect(engine)
     existing = {column["name"] for column in inspector.get_columns("objects")}
     columns = {
@@ -158,6 +167,7 @@ def migrate_object_columns():
 
 
 def migrate_pickup_columns():
+    # Adds pickup reward/grouping fields if an existing DB was created earlier.
     inspector = inspect(engine)
     existing = {column["name"] for column in inspector.get_columns("pickup_requests")}
     columns = {
@@ -171,6 +181,7 @@ def migrate_pickup_columns():
 
 
 def migrate_user_columns():
+    # Adds phone and OTP columns for the newer phone/email login flow.
     inspector = inspect(engine)
     existing = {column["name"] for column in inspector.get_columns("users")}
     columns = {
@@ -189,12 +200,14 @@ def migrate_user_columns():
 
 
 def add_tracking(db: Session, object_id: int, status: str, note: str | None = None):
+    # Central helper so every status-changing route records a timeline event.
     tracking = models.ItemTracking(object_id=object_id, status=status, note=note)
     db.add(tracking)
     return tracking
 
 
 def seed_database(db: Session):
+    # Demo users make it possible to run the prototype immediately after setup.
     seeds = [
         ("Admin", "admin@swachhratham.com", "admin123", "admin", 0),
         ("Citizen", "citizen@swachhratham.com", "citizen123", "citizen", 120),

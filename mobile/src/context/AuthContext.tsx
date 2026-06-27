@@ -22,6 +22,8 @@ type OtpChallenge = {
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: PropsWithChildren) {
+  // AuthProvider owns the current user and exposes login/register/logout helpers
+  // to every screen through useAuth().
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -31,6 +33,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
   }
 
   useEffect(() => {
+    // On app launch, restore the saved JWT and validate it with /auth/me.
     getToken()
       .then(async (token) => {
         if (token) {
@@ -42,6 +45,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
   }, []);
 
   async function login(identifier: string, password: string) {
+    // Identifier can be email or phone; backend decides how to look it up.
     const data = await apiFetch<{ access_token: string; user: User }>("/auth/login", {
       method: "POST",
       body: JSON.stringify({ identifier, password })
@@ -51,6 +55,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
   }
 
   async function verifyOtp(identifier: string, otp: string) {
+    // Registration completes after OTP verification and then stores the JWT.
     const data = await apiFetch<{ access_token: string; user: User }>("/auth/verify-otp", {
       method: "POST",
       body: JSON.stringify({ identifier, otp })
@@ -60,6 +65,8 @@ export function AuthProvider({ children }: PropsWithChildren) {
   }
 
   async function register(name: string, identifier: string, password: string, role: string) {
+    // The backend accepts separate email/phone fields, while the UI has one
+    // identifier input for a simpler prototype experience.
     const isEmail = identifier.includes("@");
     return apiFetch<OtpChallenge>("/auth/register", {
       method: "POST",
@@ -87,6 +94,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
 }
 
 export function useAuth() {
+  // Guard against calling auth helpers outside the provider tree.
   const value = useContext(AuthContext);
   if (!value) {
     throw new Error("useAuth must be used inside AuthProvider");

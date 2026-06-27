@@ -4,6 +4,7 @@ from typing import Optional
 from pydantic import BaseModel, EmailStr
 
 
+# Pydantic schemas are the request/response shapes exposed by the API.
 class Token(BaseModel):
     access_token: str
     token_type: str = "bearer"
@@ -26,6 +27,7 @@ class UserOut(UserBase):
     ecopoints: int
 
     class Config:
+        # Allows Pydantic to serialize SQLAlchemy model instances directly.
         from_attributes = True
 
 
@@ -47,6 +49,8 @@ class OtpChallenge(BaseModel):
 
 
 class ObjectCreate(BaseModel):
+    # Extra condition fields give the rule-based classifier more signals than
+    # category/condition alone.
     name: str
     quantity: int = 1
     category: str
@@ -93,6 +97,8 @@ class PickupStatusUpdate(BaseModel):
 
 
 class PickupOut(BaseModel):
+    # Nested object/citizen/driver fields let the mobile app render pickup cards
+    # without making extra API calls for each related record.
     id: int
     object_id: int
     user_id: int

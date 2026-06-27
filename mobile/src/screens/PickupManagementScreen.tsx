@@ -14,6 +14,7 @@ type PickupGroup = {
 };
 
 function groupPickups(pickups: Pickup[]): PickupGroup[] {
+  // Bulk requests share a group id; single requests get their own synthetic key.
   const groups = new Map<string, Pickup[]>();
   pickups.forEach((pickup) => {
     const key = pickup.bulk_group_id || `single-${pickup.id}`;
@@ -27,6 +28,7 @@ function groupPickups(pickups: Pickup[]): PickupGroup[] {
 }
 
 export default function PickupManagementScreen() {
+  // Admin can assign drivers and update selected single/bulk pickup groups.
   const [pickups, setPickups] = useState<Pickup[]>([]);
   const [driverId, setDriverId] = useState("3");
   const [selectedGroup, setSelectedGroup] = useState<PickupGroup | null>(null);
@@ -39,6 +41,7 @@ export default function PickupManagementScreen() {
   useFocusEffect(useCallback(() => { load().catch(() => undefined); }, []));
 
   async function assign() {
+    // Use the bulk endpoint when the selected group represents multiple objects.
     if (!selectedGroup) return;
     const firstPickup = selectedGroup.pickups[0];
     try {
@@ -58,6 +61,8 @@ export default function PickupManagementScreen() {
   }
 
   async function updateStatus(status: string) {
+    // Status update targets the first pickup in the selected group; assignment
+    // handles bulk groups separately.
     if (!selectedGroup) return;
     const firstPickup = selectedGroup.pickups[0];
     try {

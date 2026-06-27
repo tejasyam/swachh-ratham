@@ -7,11 +7,13 @@ import { styles } from "../theme";
 import { Pickup } from "../types";
 
 export default function PickupRequestScreen({ route, navigation }: any) {
+  // Final confirmation screen for a single classified object pickup.
   const object = route.params?.object;
   const [address, setAddress] = useState(route.params?.address || "");
   const [loading, setLoading] = useState(false);
 
   async function submit() {
+    // Creates the pickup request and returns the citizen to the object tracker.
     try {
       setLoading(true);
       const pickup = await apiFetch<Pickup>("/pickups/request", {

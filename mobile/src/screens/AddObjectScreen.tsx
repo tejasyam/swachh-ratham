@@ -21,6 +21,7 @@ function ChoiceGroup({
   options: string[];
   onChange: (value: string) => void;
 }) {
+  // Reusable segmented choice control for classifier inputs.
   return (
     <>
       <Text style={styles.label}>{label}</Text>
@@ -51,6 +52,7 @@ function ChoiceGroup({
 }
 
 export default function AddObjectScreen({ navigation }: any) {
+  // This screen handles both a single-object flow and a bulk cart flow.
   const [name, setName] = useState("");
   const [quantity, setQuantity] = useState("1");
   const [category, setCategory] = useState("furniture");
@@ -71,6 +73,7 @@ export default function AddObjectScreen({ navigation }: any) {
   const [requesting, setRequesting] = useState(false);
 
   useEffect(() => {
+    // Preload the last pickup address so citizens do not retype it every time.
     Promise.all([
       AsyncStorage.getItem(PICKUP_ADDRESS_KEY),
       AsyncStorage.getItem(PICKUP_ADDRESS_HISTORY_KEY)
@@ -87,6 +90,7 @@ export default function AddObjectScreen({ navigation }: any) {
   }, []);
 
   async function rememberAddress(value: string) {
+    // Save the address after a successful object or bulk pickup request.
     const cleanAddress = value.trim();
     if (!cleanAddress) return;
     const nextHistory = uniqueAddressHistory([cleanAddress, ...addressHistory]);
@@ -124,6 +128,7 @@ export default function AddObjectScreen({ navigation }: any) {
   }
 
   function loadCartItem(item: ObjectItem) {
+    // Loading a cart item into the form allows edits before requesting pickup.
     setEditingCartItemId(item.id);
     setName(item.name);
     setQuantity(String(item.quantity || 1));
@@ -146,6 +151,8 @@ export default function AddObjectScreen({ navigation }: any) {
   }
 
   async function pickImage(camera = false) {
+    // Expo Image Picker returns either camera or gallery images; base64 is used
+    // so the prototype can show images without object storage.
     const permission = camera ? await ImagePicker.requestCameraPermissionsAsync() : await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permission.granted) {
       Alert.alert("Permission needed", "Please allow image access to attach an object photo.");
@@ -162,6 +169,7 @@ export default function AddObjectScreen({ navigation }: any) {
   }
 
   async function createObject() {
+    // Object creation calls the backend classifier and returns the saved item.
     if (!isFormComplete) {
       Alert.alert("Complete the form", "Please fill every field and add an object image before classification.");
       return null;
@@ -201,6 +209,8 @@ export default function AddObjectScreen({ navigation }: any) {
   }
 
   async function addToCart() {
+    // In bulk mode, each object is still classified individually before it joins
+    // the local collection cart.
     try {
       setLoading(true);
       if (editingCartItemId) {
@@ -239,6 +249,7 @@ export default function AddObjectScreen({ navigation }: any) {
   }
 
   async function requestBulkPickup() {
+    // A bulk request sends all cart object ids with one shared pickup address.
     if (!address.trim()) {
       Alert.alert("Pickup address needed", "Enter one pickup address for the bulk collection.");
       return;
